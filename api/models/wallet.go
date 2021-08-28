@@ -3,7 +3,6 @@ package models
 import (
 	"errors"
 	"html"
-	"log"
 	"strings"
 	"time"
 
@@ -57,30 +56,11 @@ func (u *Wallet) Prepare() {
 }
 
 
-func (u *CreditDebit) ValidateCreditDebit(action string) error {
-	switch strings.ToLower(action) {
-	case "credit":
-		if u.CreditAmount == "" {
-			return errors.New("Required credit amount")
-		}
-		
-		return nil
-	case "debit":
-		if u.DebitAmount == "" {
-			return errors.New("Required debit amount")
-		}
-		return nil
-
-	default:
-		
-		return nil
-	}
-}
 
 func (u *Wallet) Validate(action string) error {
 	switch strings.ToLower(action) {
 	case "update":
-		if u.WalletID == "" {
+		if u.Nickname == "" {
 			return errors.New("Required Wallet ID")
 		}
 		if u.Password == "" {
@@ -160,30 +140,30 @@ func (u *Wallet) CreditAWallet(db *gorm.DB, uid uint32, amount uint32) (*Wallet,
 	
 	type Result struct {
 		Status string
-		Walletbalance  int
+		Walletbalance  uint32
 	  }
 	  
 	var result Result
-	getbalanceAndStatus = db.Model(&Wallet{}).Select("walletbalance, status").Where("id = ?", uid).Scan(&result)
+	getbalanceAndStatus := db.Model(&Wallet{}).Select("walletbalance, status").Where("id = ?", uid).Scan(&result)
 	
 	if getbalanceAndStatus.Error != nil {
 		return &Wallet{}, db.Error
 	}
 
-	newbalance = result.WalletBalance + amount
-	status = result.Status
+	newbalance := result.Walletbalance + amount
+	status := result.Status
 
 	if status != "Acive"{
-		return "Account is inactive", nil
+		return &Wallet{}, errors.New("Account is inactive")
 	}
 
 	db = db.Debug().Model(&Wallet{}).Where("id=?", uid).Update("walletbalance", newbalance)
 	if db.Error != nil {
-		return 0, db.Error
+		return &Wallet{}, db.Error
 	}
 
 	// This is the display the updated wallet
-	err = db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
+	err := db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
 	if err != nil {
 		return &Wallet{}, err
 	}
@@ -196,34 +176,34 @@ func (u *Wallet) DebitAWallet(db *gorm.DB, uid uint32, amount uint32) (*Wallet, 
 	
 	type Result struct {
 		Status string
-		Walletbalance  int
+		Walletbalance  uint32
 	  }
 	  
 	var result Result
-	getbalanceAndStatus = db.Model(&Wallet{}).Select("walletbalance, status").Where("id = ?", uid).Scan(&result)
+	getbalanceAndStatus := db.Model(&Wallet{}).Select("walletbalance, status").Where("id = ?", uid).Scan(&result)
 	
 	if getbalanceAndStatus.Error != nil {
 		return &Wallet{}, db.Error
 	}
 
-	if amount > result.WalletBalance 
-	[
-		return "Insufficient balance", nil
-	]
-	newbalance = result.WalletBalance - amount
-	status = result.Status
+	if amount > result.Walletbalance {
+		return &Wallet{},errors.New("Insufficient Balance")
+	}
+	
+	newbalance := result.Walletbalance - amount
+	status := result.Status
 
-	if status != "Acive"{
-		return "Account is inactive", nil
+	if status != "Acive" {
+		return &Wallet{}, errors.New("Account is inactive")
 	}
 
 	db = db.Debug().Model(&Wallet{}).Where("id=?", uid).Update("walletbalance", newbalance)
 	if db.Error != nil {
-		return 0, db.Error
+		return &Wallet{}, db.Error
 	}
 
 	// This is the display the updated wallet
-	err = db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
+	err := db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
 	if err != nil {
 		return &Wallet{}, err
 	}
@@ -238,11 +218,11 @@ func (u *Wallet) ActivateAWallet(db *gorm.DB, uid uint32) (int64, error) {
 	}
 
 	// This is the display the updated wallet
-	err = db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
+	err := db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
 	if err != nil {
-		return &Wallet{}, err
+		return 0, err
 	}
-	return u, nil
+	return 0, nil
 
 }
 
@@ -254,11 +234,11 @@ func (u *Wallet) DeactivateAWallet(db *gorm.DB, uid uint32) (int64, error) {
 	}
 
 	// This is the display the updated wallet
-	err = db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
+	err := db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
 	if err != nil {
-		return &Wallet{}, err
+		return 0, err
 	}
-	return u, nil
+	return 0, nil
 }
 
 func (u *Wallet) DeleteAWallet(db *gorm.DB, uid uint32) (int64, error) {

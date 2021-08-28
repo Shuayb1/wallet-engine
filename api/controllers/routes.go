@@ -7,9 +7,6 @@ func (s *Server) initializeRoutes() {
 	// Home Route
 	s.Router.HandleFunc("/", middlewares.SetMiddlewareJSON(s.Home)).Methods("GET")
 
-	// Wallet Route
-	s.Router.HandleFunc("/login", middlewares.SetMiddlewareJSON(s.Login)).Methods("POST")
-
 	//Wallets routes
 	s.Router.HandleFunc("/createwallet", middlewares.SetMiddlewareJSON(s.CreateWallet)).Methods("POST")
 	s.Router.HandleFunc("/wallets", middlewares.SetMiddlewareJSON(s.GetWallets)).Methods("GET")

@@ -98,6 +98,9 @@ func (server *Server) GetWallet(w http.ResponseWriter, r *http.Request) {
 func (server *Server) CreditWallet(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
+	amountCredit := models.CreditDebit{}
+	wallet := models.Wallet{}
+
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
@@ -108,7 +111,6 @@ func (server *Server) CreditWallet(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	amountCredit := models.CreditDebit{}
 	err = json.Unmarshal(body, &amountCredit)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -123,11 +125,7 @@ func (server *Server) CreditWallet(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
 		return
 	}
-	err = amountDebit.ValidateCreditDebit("credit")
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
+
 	updatedWallet, err := wallet.CreditAWallet(server.DB, uint32(uid), uint32(amountCredit.CreditAmount))
 	if err != nil {
 		formattedError := utils.FormatError(err.Error())
@@ -140,6 +138,9 @@ func (server *Server) CreditWallet(w http.ResponseWriter, r *http.Request) {
 func (server *Server) DebitWallet(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
+	amountDebit := models.CreditDebit{}
+	wallet := models.Wallet{}
+
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
@@ -150,7 +151,6 @@ func (server *Server) DebitWallet(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	amountDebit := models.CreditDebit{}
 	err = json.Unmarshal(body, &amountDebit)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -165,11 +165,7 @@ func (server *Server) DebitWallet(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
 		return
 	}
-	err = amountDebit.ValidateCreditDebit("debit")
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
+
 	updatedWallet, err := wallet.DebitAWallet(server.DB, uint32(uid), uint32(amountDebit.DebitAmount))
 	if err != nil {
 		formattedError := utils.FormatError(err.Error())
@@ -179,10 +175,9 @@ func (server *Server) DebitWallet(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, updatedWallet)
 }
 
-func (server *Server) ActivateWallet(w http.ResponseWriter, r *http.Request) {
+func (server *Server) ActivateAWallet(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	
 	wallet := models.Wallet{}
 
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -199,7 +194,7 @@ func (server *Server) ActivateWallet(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
 		return
 	}
-	updatedWallet, err = wallet.ActivateAWallet(server.DB, uint32(uid))
+	updatedWallet, err := wallet.ActivateAWallet(server.DB, uint32(uid))
 	if err != nil {
 		formattedError := utils.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
@@ -208,7 +203,7 @@ func (server *Server) ActivateWallet(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, updatedWallet)
 }
 
-func (server *Server) DeactivateWallet(w http.ResponseWriter, r *http.Request) {
+func (server *Server) DeactivateAWallet(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 
@@ -228,7 +223,7 @@ func (server *Server) DeactivateWallet(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
 		return
 	}
-	updatedWallet, err = wallet.DeactivateAWallet(server.DB, uint32(uid))
+	updatedWallet, err := wallet.DeactivateAWallet(server.DB, uint32(uid))
 	if err != nil {
 		formattedError := utils.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
