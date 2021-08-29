@@ -125,7 +125,7 @@ func (u *Wallet) FindAllWallets(db *gorm.DB) (*[]Wallet, error) {
 
 func (u *Wallet) FindWalletByID(db *gorm.DB, uid uint32) (*Wallet, error) {
 	var err error
-	err = db.Debug().Model(Wallet{}).Where("id = ?", uid).Take(&u).Error
+	err = db.Debug().Model(Wallet{}).Where("wallet_id = ?", uid).Take(&u).Error
 	if err != nil {
 		return &Wallet{}, err
 	}
@@ -144,7 +144,7 @@ func (u *Wallet) CreditAWallet(db *gorm.DB, uid uint32, amount uint32) (*Wallet,
 	  }
 	  
 	var result Result
-	getbalanceAndStatus := db.Model(&Wallet{}).Select("walletbalance, status").Where("id = ?", uid).Scan(&result)
+	getbalanceAndStatus := db.Model(&Wallet{}).Select("walletbalance, status").Where("wallet_id = ?", uid).Scan(&result)
 	
 	if getbalanceAndStatus.Error != nil {
 		return &Wallet{}, db.Error
@@ -157,13 +157,13 @@ func (u *Wallet) CreditAWallet(db *gorm.DB, uid uint32, amount uint32) (*Wallet,
 		return &Wallet{}, errors.New("Account is inactive")
 	}
 
-	db = db.Debug().Model(&Wallet{}).Where("id=?", uid).Update("walletbalance", newbalance)
+	db = db.Debug().Model(&Wallet{}).Where("wallet_id=?", uid).Update("walletbalance", newbalance)
 	if db.Error != nil {
 		return &Wallet{}, db.Error
 	}
 
 	// This is the display the updated wallet
-	err := db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
+	err := db.Debug().Model(&Wallet{}).Where("wallet_id = ?", uid).Take(&u).Error
 	if err != nil {
 		return &Wallet{}, err
 	}
@@ -180,7 +180,7 @@ func (u *Wallet) DebitAWallet(db *gorm.DB, uid uint32, amount uint32) (*Wallet, 
 	  }
 	  
 	var result Result
-	getbalanceAndStatus := db.Model(&Wallet{}).Select("walletbalance, status").Where("id = ?", uid).Scan(&result)
+	getbalanceAndStatus := db.Model(&Wallet{}).Select("walletbalance, status").Where("wallet_id = ?", uid).Scan(&result)
 	
 	if getbalanceAndStatus.Error != nil {
 		return &Wallet{}, db.Error
@@ -197,13 +197,13 @@ func (u *Wallet) DebitAWallet(db *gorm.DB, uid uint32, amount uint32) (*Wallet, 
 		return &Wallet{}, errors.New("Account is inactive")
 	}
 
-	db = db.Debug().Model(&Wallet{}).Where("id=?", uid).Update("walletbalance", newbalance)
+	db = db.Debug().Model(&Wallet{}).Where("wallet_id=?", uid).Update("walletbalance", newbalance)
 	if db.Error != nil {
 		return &Wallet{}, db.Error
 	}
 
 	// This is the display the updated wallet
-	err := db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
+	err := db.Debug().Model(&Wallet{}).Where("wallet_id = ?", uid).Take(&u).Error
 	if err != nil {
 		return &Wallet{}, err
 	}
@@ -212,13 +212,13 @@ func (u *Wallet) DebitAWallet(db *gorm.DB, uid uint32, amount uint32) (*Wallet, 
 
 func (u *Wallet) ActivateAWallet(db *gorm.DB, uid uint32) (int64, error) {
 
-	db = db.Debug().Model(&Wallet{}).Where("id=?", uid).Update("status", "Active")
+	db = db.Debug().Model(&Wallet{}).Where("wallet_id=?", uid).Update("status", "Active")
 	if db.Error != nil {
 		return 0, db.Error
 	}
 
 	// This is the display the updated wallet
-	err := db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
+	err := db.Debug().Model(&Wallet{}).Where("wallet_id = ?", uid).Take(&u).Error
 	if err != nil {
 		return 0, err
 	}
@@ -228,13 +228,13 @@ func (u *Wallet) ActivateAWallet(db *gorm.DB, uid uint32) (int64, error) {
 
 func (u *Wallet) DeactivateAWallet(db *gorm.DB, uid uint32) (int64, error) {
 
-	db = db.Debug().Model(&Wallet{}).Where("id=?", uid).Update("status", "Inactive")
+	db = db.Debug().Model(&Wallet{}).Where("wallet_id=?", uid).Update("status", "Inactive")
 	if db.Error != nil {
 		return 0, db.Error
 	}
 
 	// This is the display the updated wallet
-	err := db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&u).Error
+	err := db.Debug().Model(&Wallet{}).Where("wallet_id = ?", uid).Take(&u).Error
 	if err != nil {
 		return 0, err
 	}
@@ -243,7 +243,7 @@ func (u *Wallet) DeactivateAWallet(db *gorm.DB, uid uint32) (int64, error) {
 
 func (u *Wallet) DeleteAWallet(db *gorm.DB, uid uint32) (int64, error) {
 
-	db = db.Debug().Model(&Wallet{}).Where("id = ?", uid).Take(&Wallet{}).Delete(&Wallet{})
+	db = db.Debug().Model(&Wallet{}).Where("wallet_id = ?", uid).Take(&Wallet{}).Delete(&Wallet{})
 
 	if db.Error != nil {
 		return 0, db.Error
