@@ -98,47 +98,58 @@ func (server *Server) GetWallet(w http.ResponseWriter, r *http.Request) {
 func (server *Server) CreditWallet(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	amountCredit := models.CreditDebit{}
 	wallet := models.Wallet{}
+	var dat map[string]interface{}
+
 
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
+
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
 	body, err := ioutil.ReadAll(r.Body)
+
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-	err = json.Unmarshal(body, &amountCredit)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-	tokenID, err := auth.ExtractTokenID(r)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
-	}
-	if tokenID != uint32(uid) {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
 		return
 	}
 
-	updatedWallet, err := wallet.CreditAWallet(server.DB, uint32(uid), uint32(amountCredit.CreditAmount))
+	err = json.Unmarshal(body, &dat)
+
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	amount :=  dat["CreditAmount"].(float64)
+	
+	// tokenID, err := auth.ExtractTokenID(r)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+	// 	return
+	// }
+	// if tokenID != uint32(uid) {
+	// 	responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+	// 	return
+	// }
+
+
+	updatedWallet, err := wallet.CreditAWallet(server.DB, uint32(uid), uint32(amount))
+
 	if err != nil {
 		formattedError := utils.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
 		return
 	}
+
+
 	responses.JSON(w, http.StatusOK, updatedWallet)
 }
 
 func (server *Server) DebitWallet(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
-	amountDebit := models.CreditDebit{}
+	var dat map[string]interface{}
 	wallet := models.Wallet{}
 
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -151,22 +162,23 @@ func (server *Server) DebitWallet(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	err = json.Unmarshal(body, &amountDebit)
+	err = json.Unmarshal(body, &dat)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	tokenID, err := auth.ExtractTokenID(r)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
-	}
-	if tokenID != uint32(uid) {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
-		return
-	}
-
-	updatedWallet, err := wallet.DebitAWallet(server.DB, uint32(uid), uint32(amountDebit.DebitAmount))
+	// tokenID, err := auth.ExtractTokenID(r)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+	// 	return
+	// }
+	// if tokenID != uint32(uid) {
+	// 	responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+	// 	return
+	// }
+	amount :=  dat["DeditAmount"].(float64)
+	
+	updatedWallet, err := wallet.DebitAWallet(server.DB, uint32(uid), uint32(amount))
 	if err != nil {
 		formattedError := utils.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, formattedError)
@@ -185,15 +197,15 @@ func (server *Server) ActivateAWallet(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	tokenID, err := auth.ExtractTokenID(r)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
-	}
-	if tokenID != 0 && tokenID != uint32(uid) {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
-		return
-	}
+	// tokenID, err := auth.ExtractTokenID(r)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+	// 	return
+	// }
+	// if tokenID != 0 && tokenID != uint32(uid) {
+	// 	responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+	// 	return
+	// }
 	updatedWallet, err := wallet.ActivateAWallet(server.DB, uint32(uid))
 	if err != nil {
 		formattedError := utils.FormatError(err.Error())
@@ -214,15 +226,15 @@ func (server *Server) DeactivateAWallet(w http.ResponseWriter, r *http.Request) 
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	tokenID, err := auth.ExtractTokenID(r)
-	if err != nil {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
-	}
-	if tokenID != 0 && tokenID != uint32(uid) {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
-		return
-	}
+	// tokenID, err := auth.ExtractTokenID(r)
+	// if err != nil {
+	// 	responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+	// 	return
+	// }
+	// if tokenID != 0 && tokenID != uint32(uid) {
+	// 	responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+	// 	return
+	// }
 	updatedWallet, err := wallet.DeactivateAWallet(server.DB, uint32(uid))
 	if err != nil {
 		formattedError := utils.FormatError(err.Error())

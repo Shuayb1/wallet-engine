@@ -15,8 +15,8 @@ func FormatError(err string) error {
 		return errors.New("Email Already Taken")
 	}
 
-	if strings.Contains(err, "wallet") {
-		return errors.New("Wallet Already Taken")
+	if strings.Contains(err, "active") {
+		return errors.New("Account is inactive")
 	}
 
 	if strings.Contains(err, "hashedPassword") {
